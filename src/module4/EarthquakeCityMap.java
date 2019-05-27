@@ -17,6 +17,8 @@ import de.fhpotsdam.unfolding.utils.MapUtils;
 import parsing.ParseFeed;
 import processing.core.PApplet;
 
+import static module4.CityMarker.TRI_SIZE;
+
 /**
  * EarthquakeCityMap An application with an interactive map displaying
  * earthquake data. Author: UC San Diego Intermediate Software Development MOOC
@@ -93,14 +95,14 @@ public class EarthquakeCityMap extends PApplet {
 
         // STEP 2: read in city data
         List<Feature> cities = GeoJSONReader.loadData(this, cityFile);
-        cityMarkers = new ArrayList<Marker>();
+        cityMarkers = new ArrayList<>();
         for (Feature city : cities) {
             cityMarkers.add(new CityMarker(city));
         }
 
         // STEP 3: read in earthquake RSS feed
         List<PointFeature> earthquakes = ParseFeed.parseEarthquake(this, earthquakesURL);
-        quakeMarkers = new ArrayList<Marker>();
+        quakeMarkers = new ArrayList<>();
 
         for (PointFeature feature : earthquakes) {
             // check if LandQuake
@@ -114,7 +116,7 @@ public class EarthquakeCityMap extends PApplet {
         }
 
         // could be used for debugging
-        printQuakes();
+//        printQuakes();
 
         // (3) Add markers to map
         // NOTE: Country markers are not added to the map. They are used
@@ -143,17 +145,29 @@ public class EarthquakeCityMap extends PApplet {
         textSize(12);
         text("Earthquake Key", 50, 75);
 
+        float x = 50;
+        float y = 100;
+        float l = (float) Math.sqrt(3) * (float) TRI_SIZE / 2;
+        float y1 = y - l / 2;
+        float x2 = x + (float) TRI_SIZE / 2;
+        float y2 = y + l / 2;
+        float x3 = x - (float) TRI_SIZE / 2;
+        float y3 = y + l / 2;
         fill(color(255, 0, 0));
+
+        triangle(x, y1, x2, y2, x3, y3);
+
+        fill(255, 255, 255);
         ellipse(50, 125, 15, 15);
-        fill(color(255, 255, 0));
-        ellipse(50, 175, 10, 10);
-        fill(color(0, 0, 255));
-        ellipse(50, 225, 5, 5);
+        rectMode(CENTER);
+        rect(50, 150, 15, 15);
+        rectMode(CORNER);
 
         fill(0, 0, 0);
-        text("5.0+ Magnitude", 75, 125);
-        text("4.0+ Magnitude", 75, 175);
-        text("Below 4.0", 75, 225);
+        text("City Marker", 75, 100);
+        text("Land Quake", 75, 125);
+        text("Ocean Quake", 75, 150);
+        text("Size ~ Magnitude", 50, 175);
     }
 
     // Checks whether this quake occurred on land. If it did, it sets the
