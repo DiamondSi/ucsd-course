@@ -11,6 +11,7 @@ import de.fhpotsdam.unfolding.geo.Location;
 import de.fhpotsdam.unfolding.marker.AbstractShapeMarker;
 import de.fhpotsdam.unfolding.marker.Marker;
 import de.fhpotsdam.unfolding.marker.MultiMarker;
+import de.fhpotsdam.unfolding.marker.SimplePointMarker;
 import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.providers.MBTilesMapProvider;
 import de.fhpotsdam.unfolding.utils.MapUtils;
@@ -86,7 +87,7 @@ public class EarthquakeCityMap extends PApplet {
         // earthquakesURL = "test2.atom";
 
         // WHEN TAKING THIS QUIZ: Uncomment the next line
-        // earthquakesURL = "quiz1.atom";
+         earthquakesURL = "quiz1.atom";
 
         // (2) Reading in earthquake data and geometric properties
         // STEP 1: load country features and markers
@@ -116,7 +117,7 @@ public class EarthquakeCityMap extends PApplet {
         }
 
         // could be used for debugging
-//        printQuakes();
+        printQuakes();
 
         // (3) Add markers to map
         // NOTE: Country markers are not added to the map. They are used
@@ -153,7 +154,7 @@ public class EarthquakeCityMap extends PApplet {
         float y2 = y + l / 2;
         float x3 = x - (float) TRI_SIZE / 2;
         float y3 = y + l / 2;
-        fill(color(255, 0, 0));
+        fill(255, 0, 0);
 
         triangle(x, y1, x2, y2, x3, y3);
 
@@ -162,12 +163,28 @@ public class EarthquakeCityMap extends PApplet {
         rectMode(CENTER);
         rect(50, 150, 15, 15);
         rectMode(CORNER);
+        fill(255, 255, 0);
+        ellipse(50, 200, 15, 15);
+        fill(0, 0, 255);
+        ellipse(50, 225, 15, 15);
+        fill(255, 0, 0);
+        ellipse(50, 250, 15, 15);
 
-        fill(0, 0, 0);
+        fill(0);
+
         text("City Marker", 75, 100);
         text("Land Quake", 75, 125);
         text("Ocean Quake", 75, 150);
         text("Size ~ Magnitude", 50, 175);
+        text("Shallow", 75, 200);
+        text("Intermediate", 75, 225);
+        text("Deep", 75, 250);
+        text("Past hour", 75, 275);
+        noFill();
+        ellipse(50, 275, 15, 15);
+        float crossSize = 10;
+        line(50 - crossSize, 275 - crossSize, 50 + crossSize, 275 + crossSize);
+        line(50 - crossSize, 275 + crossSize, 50 + crossSize, 275 - crossSize);
     }
 
     // Checks whether this quake occurred on land. If it did, it sets the
