@@ -1,7 +1,6 @@
 package module6;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,7 +39,7 @@ public class EarthquakeCityMap extends PApplet {
     private static final long serialVersionUID = 1L;
 
     // IF YOU ARE WORKING OFFILINE, change the value of this variable to true
-    private static final boolean offline = true;
+    private static final boolean offline = false;
 
     /**
      * This is where to find the local tiles, for working without an Internet connection
@@ -70,6 +69,11 @@ public class EarthquakeCityMap extends PApplet {
     private CommonMarker lastSelected;
     private CommonMarker lastClicked;
 
+    //fields for earthquakes nearby city information
+    private int nearbyEarthquakesCount;
+    private double averageMagnitude;
+    private EarthquakeMarker mostRecent;
+
     public void setup() {
         // (1) Initializing canvas and map tiles
         size(900, 700, OPENGL);
@@ -86,10 +90,10 @@ public class EarthquakeCityMap extends PApplet {
         // FOR TESTING: Set earthquakesURL to be one of the testing files by uncommenting
         // one of the lines below.  This will work whether you are online or offline
 //        earthquakesURL = "test1.atom";
-        earthquakesURL = "test2.atom";
+//        earthquakesURL = "test2.atom";
 
         // Uncomment this line to take the quiz
-        //earthquakesURL = "quiz2.atom";
+        earthquakesURL = "quiz2.atom";
 
 
         // (2) Reading in earthquake data and geometric properties
@@ -138,12 +142,12 @@ public class EarthquakeCityMap extends PApplet {
         background(0);
         map.draw();
         addKey();
-
+        if (lastClicked instanceof CityMarker) {
+            popUpMenuCityClicked(nearbyEarthquakesCount, averageMagnitude, mostRecent);
+        }
     }
 
 
-    //   private void sortAndPrint(int numToPrint)
-    // and then call that method from setUp
     private void sortAndPrint(int numToPrint) {
         quakeMarkers.stream()
                 .map(EarthquakeMarker.class::cast)
@@ -198,6 +202,9 @@ public class EarthquakeCityMap extends PApplet {
         if (lastClicked != null) {
             unhideMarkers();
             lastClicked = null;
+            mostRecent = null;
+            nearbyEarthquakesCount = 0;
+            averageMagnitude = 0;
         } else if (lastClicked == null) {
             checkEarthquakesForClick();
             if (lastClicked == null) {
@@ -209,6 +216,7 @@ public class EarthquakeCityMap extends PApplet {
     // Helper method that will check if a city marker was clicked on
     // and respond appropriately
     private void checkCitiesForClick() {
+        List<EarthquakeMarker> nearestEarthquakeMarkers = new ArrayList<>();
         if (lastClicked != null) return;
         // Loop over the earthquake markers to see if one of them is selected
         for (Marker marker : cityMarkers) {
@@ -225,7 +233,22 @@ public class EarthquakeCityMap extends PApplet {
                     if (quakeMarker.getDistanceTo(marker.getLocation())
                             > quakeMarker.threatCircle()) {
                         quakeMarker.setHidden(true);
+                    } else {
+                        nearestEarthquakeMarkers.add(quakeMarker);
                     }
+                }
+                // calculate data for popup menu
+                if (nearestEarthquakeMarkers.size() > 0) {
+                    nearbyEarthquakesCount = nearestEarthquakeMarkers.size();
+                    averageMagnitude = nearestEarthquakeMarkers.stream()
+                            .mapToDouble(EarthquakeMarker::getMagnitude)
+                            .average()
+                            .orElse(Double.NaN);
+                    mostRecent = nearestEarthquakeMarkers.stream()
+                            .filter(earthquakeMarker ->
+                                    "Past Hour".equals(earthquakeMarker.getProperty("age")) ||
+                                            "Past Day".equals(earthquakeMarker.getProperty("age")))
+                            .findFirst().orElse(null);
                 }
                 return;
             }
@@ -266,6 +289,36 @@ public class EarthquakeCityMap extends PApplet {
 
         for (Marker marker : cityMarkers) {
             marker.setHidden(false);
+        }
+    }
+
+    private void popUpMenuCityClicked(int nearbyEarthquakesCount, double averageMagnitude, EarthquakeMarker mostRecent) {
+        fill(255, 250, 240);
+
+        int xbase = 25;
+        int ybase = 420;
+        rect(xbase, ybase, 150, 190);
+        textSize(12);
+        fill(0);
+        textAlign(LEFT, CENTER);
+
+        text("Nearby Earthquakes", xbase + 10, ybase + 15);
+        text(nearbyEarthquakesCount, xbase + 10, ybase + 35);
+
+        text("Average Magnitude", xbase + 10, ybase + 55);
+        text((float) averageMagnitude, xbase + 10, ybase + 75);
+
+        text("Most Recent Earthquake", xbase + 5, ybase + 95);
+        if (mostRecent != null) {
+            String[] title = mostRecent.getTitle().split("-");
+            String magnitude = title[0].trim();
+            String distance = title[1].trim().substring(0, title[1].indexOf("of") + 1);
+            String location = title[1].substring(title[1].indexOf("of") + 2).trim();
+            text(magnitude, xbase + 10, ybase + 115);
+            text(distance, xbase + 10, ybase + 135);
+            text(location, xbase + 10, ybase + 155);
+        } else {
+            text("None", xbase + 10, ybase + 115);
         }
     }
 
